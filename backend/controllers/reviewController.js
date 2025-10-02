@@ -1,4 +1,4 @@
-import Review from '../models/Review.js';
+import Review from "../models/Review.js";
 
 // Get all reviews with filtering and sorting
 export const getAllReviews = async (req, res) => {
@@ -6,48 +6,48 @@ export const getAllReviews = async (req, res) => {
     const {
       page = 1,
       limit = 10,
-      sortBy = 'datePosted',
-      sortOrder = 'desc',
+      sortBy = "datePosted",
+      sortOrder = "desc",
       company,
       difficulty,
       rating,
       jobType,
-      search
+      search,
     } = req.query;
 
     // Build filter object
     const filter = {};
-    
+
     if (company) {
-      filter.companyName = { $regex: company, $options: 'i' };
+      filter.companyName = { $regex: company, $options: "i" };
     }
-    
+
     if (difficulty) {
       filter.difficulty = difficulty;
     }
-    
+
     if (rating) {
       filter.rating = { $gte: parseInt(rating) };
     }
-    
+
     if (jobType) {
       filter.jobType = jobType;
     }
-    
+
     if (search) {
       filter.$or = [
-        { companyName: { $regex: search, $options: 'i' } },
-        { jobRole: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search, 'i')] } }
+        { companyName: { $regex: search, $options: "i" } },
+        { jobRole: { $regex: search, $options: "i" } },
+        { tags: { $in: [new RegExp(search, "i")] } },
       ];
     }
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     // Sort configuration
     const sortConfig = {};
-    sortConfig[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    sortConfig[sortBy] = sortOrder === "desc" ? -1 : 1;
 
     // Execute query
     const reviews = await Review.find(filter)
@@ -57,15 +57,15 @@ export const getAllReviews = async (req, res) => {
       .lean();
 
     // Transform _id to id for frontend compatibility
-    const transformedReviews = reviews.map(review => ({
+    const transformedReviews = reviews.map((review) => ({
       ...review,
       id: review._id.toString(),
-      _id: undefined
+      _id: undefined,
     }));
 
     // Get total count for pagination
     const total = await Review.countDocuments(filter);
-    
+
     // Calculate pagination info
     const totalPages = Math.ceil(total / parseInt(limit));
     const hasNextPage = parseInt(page) < totalPages;
@@ -80,15 +80,15 @@ export const getAllReviews = async (req, res) => {
         totalCount: total,
         hasNextPage,
         hasPrevPage,
-        limit: parseInt(limit)
-      }
+        limit: parseInt(limit),
+      },
     });
   } catch (error) {
-    console.error('Error fetching reviews:', error);
+    console.error("Error fetching reviews:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch reviews',
-      error: error.message
+      message: "Failed to fetch reviews",
+      error: error.message,
     });
   }
 };
@@ -97,13 +97,13 @@ export const getAllReviews = async (req, res) => {
 export const getReviewById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const review = await Review.findById(id).lean();
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
@@ -111,19 +111,19 @@ export const getReviewById = async (req, res) => {
     const transformedReview = {
       ...review,
       id: review._id.toString(),
-      _id: undefined
+      _id: undefined,
     };
 
     res.json({
       success: true,
-      data: transformedReview
+      data: transformedReview,
     });
   } catch (error) {
-    console.error('Error fetching review:', error);
+    console.error("Error fetching review:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch review',
-      error: error.message
+      message: "Failed to fetch review",
+      error: error.message,
     });
   }
 };
@@ -131,17 +131,34 @@ export const getReviewById = async (req, res) => {
 // Create a new review
 export const createReview = async (req, res) => {
   try {
-    const reviewData = req.body;
-    
+    const reviewData = {
+      ...req.body,
+      userId: req.user._id, // Add user reference from auth
+      reviewerInfo: {
+        ...req.body.reviewerInfo,
+        college: req.user.branch || req.body.reviewerInfo?.college,
+        degree: req.user.year
+          ? `Year ${req.user.year}`
+          : req.body.reviewerInfo?.degree,
+      },
+    };
+
     // Validate required fields
-    const requiredFields = ['companyName', 'jobRole', 'location', 'jobType', 'experienceType', 'rating'];
-    const missingFields = requiredFields.filter(field => !reviewData[field]);
-    
+    const requiredFields = [
+      "companyName",
+      "jobRole",
+      "location",
+      "jobType",
+      "experienceType",
+      "rating",
+    ];
+    const missingFields = requiredFields.filter((field) => !reviewData[field]);
+
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields',
-        missingFields
+        message: "Missing required fields",
+        missingFields,
       });
     }
 
@@ -153,29 +170,29 @@ export const createReview = async (req, res) => {
     const transformedReview = {
       ...savedReview.toObject(),
       id: savedReview._id.toString(),
-      _id: undefined
+      _id: undefined,
     };
 
     res.status(201).json({
       success: true,
-      message: 'Review created successfully',
-      data: transformedReview
+      message: "Review created successfully",
+      data: transformedReview,
     });
   } catch (error) {
-    console.error('Error creating review:', error);
-    
-    if (error.name === 'ValidationError') {
+    console.error("Error creating review:", error);
+
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+        message: "Validation error",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
-    
+
     res.status(500).json({
       success: false,
-      message: 'Failed to create review',
-      error: error.message
+      message: "Failed to create review",
+      error: error.message,
     });
   }
 };
@@ -185,45 +202,64 @@ export const updateReview = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    
+
+    // Add authorization check
+    const review = await Review.findById(id);
+    if (!review) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Review not found" });
+    }
+
+    if (
+      review.userId.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Not authorized to update this review",
+        });
+    }
+
     // Remove fields that shouldn't be updated
     delete updateData._id;
     delete updateData.createdAt;
     delete updateData.updatedAt;
-    
-    const review = await Review.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).lean();
-    
-    if (!review) {
+
+    const updatedReview = await Review.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).lean();
+
+    if (!updatedReview) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
     res.json({
       success: true,
-      message: 'Review updated successfully',
-      data: review
+      message: "Review updated successfully",
+      data: updatedReview,
     });
   } catch (error) {
-    console.error('Error updating review:', error);
-    
-    if (error.name === 'ValidationError') {
+    console.error("Error updating review:", error);
+
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+        message: "Validation error",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
-    
+
     res.status(500).json({
       success: false,
-      message: 'Failed to update review',
-      error: error.message
+      message: "Failed to update review",
+      error: error.message,
     });
   }
 };
@@ -232,26 +268,26 @@ export const updateReview = async (req, res) => {
 export const deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const review = await Review.findByIdAndDelete(id);
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
     res.json({
       success: true,
-      message: 'Review deleted successfully'
+      message: "Review deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting review:', error);
+    console.error("Error deleting review:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete review',
-      error: error.message
+      message: "Failed to delete review",
+      error: error.message,
     });
   }
 };
@@ -264,41 +300,41 @@ export const getReviewStats = async (req, res) => {
         $group: {
           _id: null,
           totalReviews: { $sum: 1 },
-          averageRating: { $avg: '$rating' },
-          companies: { $addToSet: '$companyName' },
-          jobTypes: { $addToSet: '$jobType' }
-        }
+          averageRating: { $avg: "$rating" },
+          companies: { $addToSet: "$companyName" },
+          jobTypes: { $addToSet: "$jobType" },
+        },
       },
       {
         $project: {
           _id: 0,
           totalReviews: 1,
-          averageRating: { $round: ['$averageRating', 2] },
-          uniqueCompanies: { $size: '$companies' },
-          jobTypes: 1
-        }
-      }
+          averageRating: { $round: ["$averageRating", 2] },
+          uniqueCompanies: { $size: "$companies" },
+          jobTypes: 1,
+        },
+      },
     ]);
 
     // Get difficulty distribution
     const difficultyStats = await Review.aggregate([
       {
         $group: {
-          _id: '$difficulty',
-          count: { $sum: 1 }
-        }
-      }
+          _id: "$difficulty",
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     // Get rating distribution
     const ratingStats = await Review.aggregate([
       {
         $group: {
-          _id: '$rating',
-          count: { $sum: 1 }
-        }
+          _id: "$rating",
+          count: { $sum: 1 },
+        },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
     res.json({
@@ -308,18 +344,18 @@ export const getReviewStats = async (req, res) => {
           totalReviews: 0,
           averageRating: 0,
           uniqueCompanies: 0,
-          jobTypes: []
+          jobTypes: [],
         },
         difficultyDistribution: difficultyStats,
-        ratingDistribution: ratingStats
-      }
+        ratingDistribution: ratingStats,
+      },
     });
   } catch (error) {
-    console.error('Error fetching stats:', error);
+    console.error("Error fetching stats:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch statistics',
-      error: error.message
+      message: "Failed to fetch statistics",
+      error: error.message,
     });
   }
 };
