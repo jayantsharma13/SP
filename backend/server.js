@@ -1,22 +1,23 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
 
 // Import middleware
 import {
   generalLimiter,
   createLimiter,
   readLimiter,
-} from "./middleware/rateLimiter.js";
-import { errorHandler, notFound } from "./middleware/errorHandler.js";
+} from './middleware/rateLimiter.js';
+import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 // Import routes
-import reviewRoutes from "./routes/reviews.js";
+import reviewRoutes from './routes/reviewRoutes.js';
+import userRoutes from './routes/UserRoutes.js';
 
 // Import database connection
-import connectToDatabase from "./config/database.js";
+import connectToDatabase from './config/database.js';
 
 // Load environment variables
 dotenv.config();
@@ -26,62 +27,72 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 connectToDatabase().catch((err) => {
-  console.error("Failed to connect to MongoDB:", err);
+  console.error('Failed to connect to MongoDB:', err);
   process.exit(1);
 });
 
 // Security middleware
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
 // CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: 'http://localhost:5173',
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
 // Request logging - development only
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 
 // Body parsing middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Apply rate limiting
 app.use(generalLimiter);
 
 // Health check endpoint
-app.get("/health", (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: "API is running!",
+    message: 'API is running!',
     timestamp: new Date().toISOString(),
   });
 });
 
 // API routes
-app.use("/api/v1/reviews", reviewRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // Welcome endpoint
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: "Welcome to StudentsPark API",
-    version: "1.0.0",
+    message: 'Welcome to StudentsPark API',
+    version: '1.0.0',
     endpoints: {
-      "GET /api/v1/reviews": "Get all reviews",
-      "GET /api/v1/reviews/:id": "Get specific review",
-      "POST /api/v1/reviews": "Create new review",
-      "PUT /api/v1/reviews/:id": "Update review",
-      "DELETE /api/v1/reviews/:id": "Delete review",
-      "GET /api/v1/reviews/stats": "Get statistics",
+      reviews: {
+        'GET /api/v1/reviews': 'Get all reviews',
+        'GET /api/v1/reviews/stats': 'Get statistics',
+        'GET /api/v1/reviews/user/:userId': 'Get reviews by specific user',
+        'GET /api/v1/reviews/me': 'Get my reviews (authenticated)',
+        'GET /api/v1/reviews/:id': 'Get specific review',
+        'POST /api/v1/reviews': 'Create new review (authenticated)',
+        'PUT /api/v1/reviews/:id': 'Update review (authenticated, owner only)',
+        'DELETE /api/v1/reviews/:id':
+          'Delete review (authenticated, owner or admin)',
+      },
+      users: {
+        'POST /api/v1/users/signup': 'User registration',
+        'POST /api/v1/users/login': 'User login',
+      },
     },
   });
 });

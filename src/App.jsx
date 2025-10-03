@@ -1,20 +1,42 @@
-import { useState } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { HomePage } from './components/HomePage.jsx';
 import { SubmitReview } from './components/SubmitReview.jsx';
 import { ReviewDetails } from './components/ReviewDetails.jsx';
 import { NetflixSplash } from './components/NetflixSplash.jsx';
+import { Login } from './components/Login.jsx';
+import { Signup } from './components/Signup.jsx';
+import { ProtectedRoute } from './components/ProtectedRoute.jsx';
+import authService from './services/authService.js';
+import apiService from './services/apiService.js';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  // Load user data on mount
+  useEffect(() => {
+    const userData = authService.getUser();
+    if (userData) {
+      setUser(userData);
+    }
+  }, []);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
   };
 
+  const handleLogout = () => {
+    apiService.logout();
+    setUser(null);
+    navigate('/');
+  };
+
   if (showSplash) {
     return <NetflixSplash onAnimationComplete={handleSplashComplete} />;
   }
+  
   return (
     <div className="min-h-screen bg-black">
       {/* Netflix-style Navigation */}
@@ -27,19 +49,67 @@ function App() {
               </Link>
               <span className="text-white text-xs ml-2 bg-gray-800 px-2 py-1 rounded">EPISODES</span>
             </div>
-            <div className="flex space-x-8">
+            <div className="flex items-center space-x-4">
               <Link 
                 to="/" 
                 className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 🏠 Browse
               </Link>
-              <Link 
-                to="/submit" 
-                className="bg-red-600 text-white hover:bg-red-700 px-6 py-2 rounded-md text-sm font-bold transition-colors"
-              >
-                ➕ Add Episode
-              </Link>
+              
+              {user ? (
+                <>
+                  <Link 
+                    to="/submit" 
+                    className="bg-red-600 text-white hover:bg-red-700 px-6 py-2 rounded-md text-sm font-bold transition-colors"
+                  >
+                    ➕ Add Episode
+                  </Link>
+                  
+                  {/* User Profile Dropdown */}
+                  <div className="relative group">
+                    <button className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center font-bold">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm">{user.name}</span>
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-md shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                      <div className="py-1">
+                        <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                          {user.email}
+                        </div>
+                        <div className="px-4 py-2 text-xs text-gray-400">
+                          Role: <span className="text-red-500">{user.role}</span>
+                        </div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                        >
+                          🚪 Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/login" 
+                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="bg-red-600 text-white hover:bg-red-700 px-6 py-2 rounded-md text-sm font-bold transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -49,7 +119,16 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/submit" element={<SubmitReview />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route 
+            path="/submit" 
+            element={
+              <ProtectedRoute>
+                <SubmitReview />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/review/:id" element={<ReviewDetails />} />
         </Routes>
       </main>

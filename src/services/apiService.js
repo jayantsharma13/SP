@@ -1,3 +1,5 @@
+import authService from './authService.js';
+
 // API configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://studentspark-backend.onrender.com/api/v1'  // Update this with your actual Render backend URL
@@ -13,6 +15,7 @@ class ApiService {
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...authService.getAuthHeader(), // Add auth header automatically
         ...options.headers,
       },
       ...options,
@@ -23,6 +26,11 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle unauthorized errors
+        if (response.status === 401) {
+          authService.clearAuthData();
+          window.location.href = '/login';
+        }
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
@@ -76,6 +84,53 @@ class ApiService {
   async getReviewStats() {
     const response = await this.request('/reviews/stats');
     return response.data;
+  }
+
+  async getMyReviews(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/reviews/me${queryString ? `?${queryString}` : ''}`;
+    const response = await this.request(endpoint);
+    return response.data;
+  }
+
+  async getUserReviews(userId, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/reviews/user/${userId}${queryString ? `?${queryString}` : ''}`;
+    const response = await this.request(endpoint);
+    return response.data;
+  }
+
+  // Authentication API methods
+  async signup(userData) {
+    const response = await this.request('/users/signup', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+    
+    // Store auth data
+    if (response.token && response.user) {
+      authService.setAuthData(response.token, response.user);
+    }
+    
+    return response;
+  }
+
+  async login(credentials) {
+    const response = await this.request('/users/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    
+    // Store auth data
+    if (response.token && response.user) {
+      authService.setAuthData(response.token, response.user);
+    }
+    
+    return response;
+  }
+
+  logout() {
+    authService.clearAuthData();
   }
 
   // Health check
