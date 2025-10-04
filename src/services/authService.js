@@ -9,6 +9,9 @@ class AuthService {
   setAuthData(token, user) {
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    
+    // Dispatch custom event to notify about auth state change
+    window.dispatchEvent(new CustomEvent('authStateChanged', { detail: user }));
   }
 
   // Get stored token
@@ -31,6 +34,9 @@ class AuthService {
   clearAuthData() {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    
+    // Dispatch custom event to notify about auth state change
+    window.dispatchEvent(new CustomEvent('authStateChanged', { detail: null }));
   }
 
   // Get authorization header

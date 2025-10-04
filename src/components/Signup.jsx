@@ -61,6 +61,7 @@ export function Signup() {
 
       const response = await apiService.signup(signupData);
       
+      // The apiService automatically stores the auth data and user will be logged in
       // Redirect to home page on successful signup
       navigate('/');
     } catch (err) {
@@ -76,7 +77,7 @@ export function Signup() {
         {/* Netflix-style Logo */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-red-600 mb-2">StudentsPark</h1>
-          <p className="text-gray-400">Join the community and share your journey</p>
+          <p className="text-gray-400">Join the ultimate placement community</p>
         </div>
 
         {/* Signup Card */}
@@ -164,9 +165,9 @@ export function Signup() {
               </div>
             </div>
 
-            {/* Student Information Section */}
+            {/* NIT-H Student Information Section */}
             <div className="border-t border-gray-700 pt-5 mt-5">
-              <h3 className="text-lg font-semibold text-white mb-4">Student Information</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">NIT Hamirpur Student Information</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Branch Field */}
@@ -181,7 +182,7 @@ export function Signup() {
                     value={formData.branch}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
-                    placeholder="e.g., Computer Science"
+                    placeholder="e.g., Computer Science & Engineering"
                   />
                 </div>
 
@@ -217,7 +218,7 @@ export function Signup() {
                     value={formData.rollNumber}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
-                    placeholder="e.g., CS2021001"
+                    placeholder="e.g., 21MI001 or 22CS045"
                   />
                 </div>
 

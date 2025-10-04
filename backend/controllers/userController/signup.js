@@ -15,6 +15,9 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(8);
     const hashedPassword = await bcrypt.hash(pass, salt);
 
+    // Handle empty rollNumber - convert empty string to undefined for sparse index
+    const processedRollNumber = rollNumber && rollNumber.trim() !== '' ? rollNumber.trim() : undefined;
+
     const newUser = new User({
       name,
       email,
@@ -22,7 +25,7 @@ export const signup = async (req, res) => {
       role: role || "student",
       branch,
       year,
-      rollNumber,
+      rollNumber: processedRollNumber,
     });
 
     await newUser.save();
@@ -48,6 +51,21 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.error("Signup Error:", error);
+    
+    // Handle MongoDB duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      let message = "Duplicate entry found";
+      
+      if (field === 'email') {
+        message = "Email already registered";
+      } else if (field === 'rollNumber') {
+        message = "Roll number already exists";
+      }
+      
+      return res.status(400).json({ message });
+    }
+    
     res.status(500).json({ message: "Server error" });
   }
 };

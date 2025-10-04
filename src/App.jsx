@@ -15,12 +15,34 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // Load user data on mount
+  // Load user data on mount and listen for authentication changes
   useEffect(() => {
     const userData = authService.getUser();
     if (userData) {
       setUser(userData);
     }
+
+    // Listen for storage changes (when auth data is updated)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user_data') {
+        const newUserData = e.newValue ? JSON.parse(e.newValue) : null;
+        setUser(newUserData);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-tab auth changes
+    const handleAuthChange = (e) => {
+      setUser(e.detail);
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
   }, []);
 
   const handleSplashComplete = () => {
@@ -29,7 +51,7 @@ function App() {
 
   const handleLogout = () => {
     apiService.logout();
-    setUser(null);
+    // No need to manually set user to null as the authStateChanged event will handle it
     navigate('/');
   };
 
@@ -138,14 +160,14 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="text-red-600 text-2xl font-bold mb-4">StudentsPark</div>
-            <p className="text-gray-400 mb-4">Your ultimate destination for placement interview stories</p>
+            <p className="text-gray-400 mb-4">Your ultimate destination for placement interview experiences</p>
             <div className="flex justify-center space-x-6 text-gray-500 text-sm">
               <span>🎬 Original Content</span>
               <span>📚 Student Stories</span>
               <span>🎯 Interview Prep</span>
               <span>💼 Career Success</span>
             </div>
-            <p className="text-gray-600 text-sm mt-6">&copy; 2024 StudentsPark. Empowering students through shared experiences.</p>
+            <p className="text-gray-600 text-sm mt-6">&copy; 2024 StudentsPark. Empowering students through shared placement experiences.</p>
           </div>
         </div>
       </footer>

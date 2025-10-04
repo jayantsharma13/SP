@@ -29,7 +29,10 @@ class ApiService {
         // Handle unauthorized errors
         if (response.status === 401) {
           authService.clearAuthData();
-          window.location.href = '/login';
+          // Don't redirect if we're already on login/signup pages
+          if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+            window.location.href = '/login';
+          }
         }
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }

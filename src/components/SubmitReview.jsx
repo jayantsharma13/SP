@@ -356,6 +356,7 @@ export function SubmitReview() {
                 value={formData.reviewerInfo.college}
                 onChange={handleInputChange}
                 required
+                placeholder="e.g., IIT Delhi, NIT Warangal, BITS Pilani"
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               />
             </div>
@@ -367,7 +368,7 @@ export function SubmitReview() {
                 value={formData.reviewerInfo.degree}
                 onChange={handleInputChange}
                 required
-                placeholder="e.g., B.Tech CSE, MBA"
+                placeholder="e.g., B.Tech CSE, B.Tech ECE, M.Tech, MBA"
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               />
             </div>

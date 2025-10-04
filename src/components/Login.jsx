@@ -35,6 +35,7 @@ export function Login() {
 
       const response = await apiService.login(formData);
       
+      // The apiService automatically stores the auth data and user will be logged in
       // Redirect to home page on successful login
       navigate('/');
     } catch (err) {
@@ -50,7 +51,7 @@ export function Login() {
         {/* Netflix-style Logo */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-red-600 mb-2">StudentsPark</h1>
-          <p className="text-gray-400">Sign in to share your interview stories</p>
+          <p className="text-gray-400">Sign in to access placement experiences from students worldwide</p>
         </div>
 
         {/* Login Card */}

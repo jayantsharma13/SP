@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ReviewCard } from '../components/ReviewCard.jsx';
+import { CompanySummary } from '../components/CompanySummary.jsx';
+import { PreparationTips } from '../components/PreparationTips.jsx';
 import apiService from '../services/apiService.js';
+import authService from '../services/authService.js';
 
 export function HomePage() {
   const [sortBy, setSortBy] = useState('date');
@@ -10,6 +13,9 @@ export function HomePage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groupedView, setGroupedView] = useState(true);
+  const [selectedCompanyForSummary, setSelectedCompanyForSummary] = useState('');
+  const [showPreparationTips, setShowPreparationTips] = useState(false);
+  const [selectedRoleForTips, setSelectedRoleForTips] = useState({ company: '', role: '' });
 
   // Fetch reviews on component mount
   useEffect(() => {
@@ -35,7 +41,7 @@ export function HomePage() {
         review.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         review.jobRole.toLowerCase().includes(searchTerm.toLowerCase()) ||
         review.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.reviewerInfo.college.toLowerCase().includes(searchTerm.toLowerCase());
+        (review.reviewerInfo.degree && review.reviewerInfo.degree.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesRating = filterByRating === null || 
         Math.floor(review.rating.overall) >= filterByRating;
@@ -93,8 +99,8 @@ export function HomePage() {
             Interview Experiences
           </h1>
           <p className="text-xl text-gray-200 mb-6 max-w-3xl leading-relaxed">
-            Binge-watch real interview stories, online assessment breakdowns, and placement secrets from students across India. 
-            Your next career move starts here.
+            Discover real interview experiences, online assessment insights, and placement strategies from students across colleges. 
+            Your next career breakthrough starts here.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
@@ -133,7 +139,7 @@ export function HomePage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">🔍 Search Stories</label>
             <input
               type="text"
-              placeholder="Search by company, role, location, or college..."
+              placeholder="Search by company, role, location, or branch..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
@@ -228,6 +234,8 @@ export function HomePage() {
         )}
       </div>
 
+
+
       {/* Results Summary */}
       <div className="mb-6">
         <p className="text-gray-300 text-lg">
@@ -285,14 +293,68 @@ export function HomePage() {
                           {groupedReviews[company].length} {groupedReviews[company].length === 1 ? 'Review' : 'Reviews'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <span>Avg Rating:</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-yellow-400">★</span>
-                          <span className="text-white font-medium">
-                            {(groupedReviews[company].reduce((sum, review) => sum + review.rating.overall, 0) / groupedReviews[company].length).toFixed(1)}
-                          </span>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <span>Avg Rating:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-yellow-400">★</span>
+                            <span className="text-white font-medium">
+                              {(groupedReviews[company].reduce((sum, review) => sum + review.rating.overall, 0) / groupedReviews[company].length).toFixed(1)}
+                            </span>
+                          </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedCompanyForSummary(
+                              selectedCompanyForSummary === company ? '' : company
+                            )}
+                            className={`px-3 py-1 text-white text-xs rounded transition-colors flex items-center gap-1 ${
+                              selectedCompanyForSummary === company
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
+                          >
+                            🤖 {selectedCompanyForSummary === company ? 'Hide' : 'AI Summary'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Company Summary - Inline */}
+                    {selectedCompanyForSummary === company && (
+                      <div className="mb-6">
+                        <CompanySummary 
+                          companyName={company}
+                          isVisible={true}
+                        />
+                      </div>
+                    )}
+
+                    {/* Popular Roles for Preparation Tips */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-gray-300 text-sm">Popular roles:</span>
+                        {Array.from(new Set(groupedReviews[company].map(r => r.jobRole)))
+                          .slice(0, 3)
+                          .map(role => (
+                            <button
+                              key={role}
+                              onClick={() => {
+                                if (authService.isAuthenticated()) {
+                                  setSelectedRoleForTips({ company, role });
+                                  setShowPreparationTips(true);
+                                } else {
+                                  // Redirect to login for preparation tips
+                                  window.location.href = '/login';
+                                }
+                              }}
+                              className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex items-center gap-1"
+                              title={authService.isAuthenticated() ? `Get AI tips for ${role}` : 'Login required for personalized tips'}
+                            >
+                              🎯 {role} Tips
+                              {!authService.isAuthenticated() && <span className="text-xs">🔒</span>}
+                            </button>
+                          ))}
                       </div>
                     </div>
                     
@@ -326,7 +388,7 @@ export function HomePage() {
             </div>
             <h2 className="text-3xl font-bold text-white mb-4">Ready to Share Your Story?</h2>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto text-lg">
-              Join thousands of students who are helping others succeed. Your interview experience could be the next binge-worthy episode!
+              Join students from across colleges in building the most comprehensive placement resource. Your experience matters!
             </p>
             <Link
               to="/submit"
@@ -336,6 +398,18 @@ export function HomePage() {
             </Link>
           </div>
         )}
+
+      {/* Preparation Tips Modal */}
+      {showPreparationTips && selectedRoleForTips.company && selectedRoleForTips.role && (
+        <PreparationTips
+          companyName={selectedRoleForTips.company}
+          jobRole={selectedRoleForTips.role}
+          onClose={() => {
+            setShowPreparationTips(false);
+            setSelectedRoleForTips({ company: '', role: '' });
+          }}
+        />
+      )}
     </div>
   );
 }

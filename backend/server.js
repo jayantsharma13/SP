@@ -15,6 +15,7 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 // Import routes
 import reviewRoutes from './routes/reviewRoutes.js';
 import userRoutes from './routes/UserRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 // Import database connection
 import connectToDatabase from './config/database.js';
@@ -70,6 +71,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/ai', aiRoutes);
 
 // Welcome endpoint
 app.get('/', (req, res) => {
@@ -92,6 +94,11 @@ app.get('/', (req, res) => {
       users: {
         'POST /api/v1/users/signup': 'User registration',
         'POST /api/v1/users/login': 'User login',
+      },
+      ai: {
+        'GET /api/v1/ai/company/:companyName/summary': 'Generate AI summary for company',
+        'GET /api/v1/ai/company/:companyName/insights': 'Get detailed company insights',
+        'GET /api/v1/ai/company/:companyName/role/:jobRole/tips': 'Generate preparation tips',
       },
     },
   });
