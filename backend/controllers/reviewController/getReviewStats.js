@@ -5,6 +5,11 @@ export const getReviewStats = async (req, res) => {
   try {
     const stats = await Review.aggregate([
       {
+        $match: {
+          'reviewerInfo.college': 'NIT Hamirpur'
+        }
+      },
+      {
         $group: {
           _id: null,
           totalReviews: { $sum: 1 },
@@ -27,6 +32,11 @@ export const getReviewStats = async (req, res) => {
     // Get difficulty distribution
     const difficultyStats = await Review.aggregate([
       {
+        $match: {
+          'reviewerInfo.college': 'NIT Hamirpur'
+        }
+      },
+      {
         $group: {
           _id: '$difficulty',
           count: { $sum: 1 },
@@ -36,6 +46,11 @@ export const getReviewStats = async (req, res) => {
 
     // Get rating distribution
     const ratingStats = await Review.aggregate([
+      {
+        $match: {
+          'reviewerInfo.college': 'NIT Hamirpur'
+        }
+      },
       {
         $group: {
           _id: '$rating',

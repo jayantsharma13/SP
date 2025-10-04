@@ -23,6 +23,7 @@ export const signup = async (req, res) => {
       email,
       password: hashedPassword,
       role: role || "student",
+      college: "NIT Hamirpur", // Fixed college for this platform
       branch,
       year,
       rollNumber: processedRollNumber,
@@ -44,6 +45,7 @@ export const signup = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        college: newUser.college,
         branch: newUser.branch,
         year: newUser.year,
         rollNumber: newUser.rollNumber,

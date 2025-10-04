@@ -31,6 +31,10 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        college: user.college,
+        branch: user.branch,
+        year: user.year,
+        rollNumber: user.rollNumber,
       },
     });
   } catch (error) {

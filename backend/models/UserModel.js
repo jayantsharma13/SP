@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "admin"],
       default: "student",
     },
+    college: {
+      type: String,
+      required: [true, "College field is required"],
+      default: "NIT Hamirpur",
+    },
     branch: {
       type: String,
       default: "N/A",

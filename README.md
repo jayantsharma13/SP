@@ -1,10 +1,10 @@
 # StudentsPark 🎓
 
-A comprehensive placement review platform for students across colleges. Share and discover real interview experiences, company insights, and placement strategies from students worldwide.
+A comprehensive placement review platform exclusively for NIT Hamirpur students. Share and discover real interview experiences, company insights, and placement strategies from your fellow NITians.
 
 ## 🌟 Features
 
-- **Authentic Reviews**: Real placement experiences from students across various colleges
+- **Authentic Reviews**: Real placement experiences from NIT Hamirpur students
 - **AI-Powered Insights**: Company summaries and preparation tips powered by Gemini 2.0
 - **Netflix-Style UI**: Modern, engaging interface for browsing placement experiences
 - **Comprehensive Analytics**: Detailed breakdowns of interview processes, difficulty levels, and outcomes
@@ -76,16 +76,16 @@ A comprehensive placement review platform for students across colleges. Share an
 
 ## 🎯 Platform Highlights
 
-### For Students
-- **Multi-College Community**: Connect with students from various colleges and universities
-- **Branch-Specific Insights**: Reviews categorized by different engineering and non-engineering branches
+### For NIT Hamirpur Students
+- **Your College Community**: Connect with your fellow NITians across all batches
+- **Branch-Specific Insights**: Reviews categorized by different engineering branches at NIT Hamirpur
 - **Alumni Network**: Learn from seniors who have successfully placed in top companies
-- **Real CGPA & Experience Data**: Understand what companies expect from different colleges
+- **Real CGPA & Experience Data**: Understand what companies expect from NIT Hamirpur students
 
 ### AI-Enhanced Experience
 - **Smart Company Summaries**: Get AI-generated insights about company hiring patterns
 - **Preparation Roadmaps**: Personalized preparation tips based on company requirements
-- **Trend Analysis**: Understand changing placement trends across different colleges
+- **Trend Analysis**: Understand changing placement trends at NIT Hamirpur
 
 ## 🏗️ Project Structure
 
@@ -135,7 +135,7 @@ The application is configured for deployment on:
 
 ## 🤝 Contributing
 
-We welcome contributions from students across all colleges! Please:
+We welcome contributions from NIT Hamirpur students! Please:
 
 1. Fork the repository
 2. Create a feature branch

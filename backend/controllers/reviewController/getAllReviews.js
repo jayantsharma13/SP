@@ -16,7 +16,10 @@ export const getAllReviews = async (req, res) => {
     } = req.query;
 
     // Build filter object
-    const filter = {};
+    const filter = {
+      // Only show reviews from NIT Hamirpur
+      'reviewerInfo.college': 'NIT Hamirpur'
+    };
 
     if (company) {
       filter.companyName = { $regex: company, $options: 'i' };

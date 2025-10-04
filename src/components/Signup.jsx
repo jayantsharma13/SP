@@ -77,7 +77,7 @@ export function Signup() {
         {/* Netflix-style Logo */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-red-600 mb-2">StudentsPark</h1>
-          <p className="text-gray-400">Join the ultimate placement community</p>
+          <p className="text-gray-400">Join the NIT Hamirpur placement community</p>
         </div>
 
         {/* Signup Card */}

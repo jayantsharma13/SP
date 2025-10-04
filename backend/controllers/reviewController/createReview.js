@@ -8,10 +8,10 @@ export const createReview = async (req, res) => {
       userId: req.user._id, // Add user reference from auth
       reviewerInfo: {
         ...req.body.reviewerInfo,
-        college: req.user.branch || req.body.reviewerInfo?.college,
-        degree: req.user.year
-          ? `Year ${req.user.year}`
-          : req.body.reviewerInfo?.degree,
+        college: req.user.college || "NIT Hamirpur", // Use user's college (always NIT Hamirpur)
+        degree: req.user.branch && req.user.year 
+          ? `${req.user.branch} - Year ${req.user.year}`
+          : req.body.reviewerInfo?.degree || "N/A",
       },
     };
 

@@ -51,7 +51,7 @@ export function Login() {
         {/* Netflix-style Logo */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-red-600 mb-2">StudentsPark</h1>
-          <p className="text-gray-400">Sign in to access placement experiences from students worldwide</p>
+          <p className="text-gray-400">Sign in to access placement experiences from NIT Hamirpur students</p>
         </div>
 
         {/* Login Card */}

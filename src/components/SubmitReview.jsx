@@ -33,7 +33,6 @@ export function SubmitReview() {
     adviceForFuture: '',
     questionsAsked: [],
     reviewerInfo: {
-      college: '',
       degree: '',
       passingYear: new Date().getFullYear(),
       previousExperience: 'Fresher'
@@ -347,28 +346,18 @@ export function SubmitReview() {
         {/* Reviewer Information */}
         <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
           <h2 className="text-xl font-semibold text-white mb-4">🎓 About You</h2>
+          <div className="text-sm text-gray-400 mb-4">
+            📍 Your college information will be automatically filled from your profile (NIT Hamirpur)
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">College *</label>
-              <input
-                type="text"
-                name="reviewerInfo.college"
-                value={formData.reviewerInfo.college}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., IIT Delhi, NIT Warangal, BITS Pilani"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Degree *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Additional Degree Info (Optional)</label>
               <input
                 type="text"
                 name="reviewerInfo.degree"
                 value={formData.reviewerInfo.degree}
                 onChange={handleInputChange}
-                required
-                placeholder="e.g., B.Tech CSE, B.Tech ECE, M.Tech, MBA"
+                placeholder="e.g., B.Tech CSE, B.Tech ECE, M.Tech, MBA, etc."
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               />
             </div>

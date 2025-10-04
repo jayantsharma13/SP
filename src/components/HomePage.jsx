@@ -99,7 +99,7 @@ export function HomePage() {
             Interview Experiences
           </h1>
           <p className="text-xl text-gray-200 mb-6 max-w-3xl leading-relaxed">
-            Discover real interview experiences, online assessment insights, and placement strategies from students across colleges. 
+            Discover real interview experiences, online assessment insights, and placement strategies from NIT Hamirpur students. 
             Your next career breakthrough starts here.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -139,7 +139,7 @@ export function HomePage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">🔍 Search Stories</label>
             <input
               type="text"
-              placeholder="Search by company, role, location, or branch..."
+              placeholder="Search by company, role, location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
@@ -388,7 +388,7 @@ export function HomePage() {
             </div>
             <h2 className="text-3xl font-bold text-white mb-4">Ready to Share Your Story?</h2>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto text-lg">
-              Join students from across colleges in building the most comprehensive placement resource. Your experience matters!
+              Join your fellow NIT Hamirpur students in building the most comprehensive placement resource. Your experience matters!
             </p>
             <Link
               to="/submit"
