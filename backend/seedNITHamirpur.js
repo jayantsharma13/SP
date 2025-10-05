@@ -493,12 +493,37 @@ const seedNITHamirpurDatabase = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studentspark');
     console.log('Connected to MongoDB');
 
+    // Import User model for creating dummy users
+    const { default: User } = await import('./models/UserModel.js');
+
+    // Create a dummy user for seeding if it doesn't exist
+    let dummyUser = await User.findOne({ email: 'seed.user@nith.ac.in' });
+    if (!dummyUser) {
+      dummyUser = new User({
+        name: 'Seed User',
+        email: 'seed.user@nith.ac.in',
+        password: 'hashedpassword123', // This won't be used for login
+        college: 'NIT Hamirpur',
+        branch: 'Computer Science',
+        year: 4,
+        rollNumber: 'SEED001'
+      });
+      await dummyUser.save();
+      console.log('Created dummy user for seeding');
+    }
+
+    // Add userId to all reviews
+    const reviewsWithUserId = nitHamirpurReviews.map(review => ({
+      ...review,
+      userId: dummyUser._id
+    }));
+
     // Clear existing reviews (optional - remove this if you want to keep existing data)
     // await Review.deleteMany({});
     // console.log('Cleared existing reviews');
 
     // Insert NIT Hamirpur reviews
-    const insertedReviews = await Review.insertMany(nitHamirpurReviews);
+    const insertedReviews = await Review.insertMany(reviewsWithUserId);
     console.log(`Successfully seeded ${insertedReviews.length} NIT Hamirpur reviews`);
 
     // Close connection
