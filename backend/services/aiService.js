@@ -93,25 +93,25 @@ class AIService {
     // Generate a basic summary based on statistics
     const topRoles = Object.entries(stats.jobTypeDistribution || {})
       .sort(([,a], [,b]) => b - a)
-      .slice(0, 2)
+      .slice(0, 1)
       .map(([role]) => role);
 
-    const summary = `Based on ${reviews.length} reviews, ${companyName} has a ${stats.averageRating}/5 rating with ${stats.selectionRate}% selection rate. Common roles: ${topRoles.join(', ')}.`;
+    const summary = `${stats.averageRating}/5 rating with ${stats.selectionRate}% success rate.`;
 
     const keyInsights = [
-      `${stats.selectionRate}% success rate from ${stats.totalReviews} candidates`,
-      `Most hiring for: ${topRoles.join(', ')}`
+      `${stats.selectionRate}% get selected`,
+      `Top role: ${topRoles[0] || 'Various'}`
     ];
 
     return {
       summary,
       keyInsights,
-      strengths: ["Structured process", "Multiple opportunities"],
+      strengths: ["Structured process", "Good opportunities"],
       challenges: ["Competitive selection"],
       recommendedPreparation: [
-        "Focus on role-specific technical skills",
-        "Practice behavioral questions",
-        "Research company background"
+        "Master technical skills",
+        "Practice behavioral questions", 
+        "Research company culture"
       ],
       statistics: stats,
       totalReviews: reviews.length,
@@ -171,36 +171,30 @@ class AIService {
 
     const allQuestions = [];
     const allTips = [];
-    const allStages = [];
 
     relevantReviews.forEach(review => {
       if (review.questionsAsked) allQuestions.push(...review.questionsAsked);
       if (review.preparationTips) allTips.push(review.preparationTips);
-      if (review.processStages) allStages.push(...review.processStages);
     });
 
     return {
       tips: [
-        `Prepare thoroughly for ${jobRole} role at ${companyName}`,
-        "Focus on both technical and behavioral questions",
-        "Practice coding problems if it's a technical role",
-        "Research the company's recent developments and culture",
-        "Prepare questions to ask the interviewer",
-        "Review your resume and be ready to discuss your experience"
+        "Master core technical concepts",
+        "Practice behavioral questions", 
+        "Research company culture",
+        "Prepare project explanations"
       ],
-      commonQuestions: [...new Set(allQuestions)].slice(0, 10),
+      commonQuestions: [...new Set(allQuestions)].slice(0, 5),
       skillsToFocus: [
-        "Technical skills relevant to the role",
-        "Problem-solving abilities",
-        "Communication skills",
-        "Leadership and teamwork",
-        "Company-specific knowledge"
+        "Technical skills",
+        "Problem solving",
+        "Communication",
+        "Leadership"
       ],
       processInsights: [
-        `Based on ${relevantReviews.length} reviews for ${jobRole}`,
-        "Interview process typically involves multiple rounds",
-        "Prepare for both technical and HR rounds",
-        "Be ready to discuss your past projects in detail"
+        `${relevantReviews.length} reviews available`,
+        "Multiple interview rounds",
+        "Technical + behavioral focus"
       ],
       isAIGenerated: false
     };
@@ -253,35 +247,30 @@ class AIService {
    * Build prompt for company summary generation
    */
   buildSummaryPrompt(companyName, reviewData, stats) {
-    return `Analyze the following interview reviews for ${companyName} and generate a concise company summary.
+    return `Generate a VERY SHORT summary for ${companyName} based on ${reviewData.length} reviews.
 
-Company: ${companyName}
-Total Reviews: ${reviewData.length}
-Average Rating: ${stats.averageRating}/5
-Selection Rate: ${stats.selectionRate}%
+Stats: ${stats.averageRating}/5 rating, ${stats.selectionRate}% selection rate
+Main roles: ${Object.keys(stats.jobTypeDistribution || {}).slice(0, 2).join(', ')}
+Difficulty: ${Object.keys(stats.difficultyDistribution || {}).sort((a,b) => (stats.difficultyDistribution[b] || 0) - (stats.difficultyDistribution[a] || 0))[0] || 'Medium'}
 
-Review Data:
-${JSON.stringify(reviewData, null, 2)}
-
-Please provide a structured response in the following JSON format:
+Respond in this EXACT JSON format with MAXIMUM limits:
 {
-  "summary": "A brief 3-4 sentence overview of the company's interview process and key characteristics based on reviews",
+  "summary": "1-2 sentences only about interview process and company culture",
   "keyInsights": [
-    "2-3 most important insights about the interview process",
-    "Focus on practical information for candidates"
+    "Max 2 insights, each under 15 words"
   ],
   "strengths": [
-    "Top 2-3 company strengths mentioned in reviews"
+    "Max 2 strengths, each under 10 words"
   ],
   "challenges": [
-    "Main 1-2 challenges or concerns mentioned"
+    "Max 1 challenge, under 12 words"
   ],
   "recommendedPreparation": [
-    "Top 3-4 most effective preparation tips based on review patterns"
+    "Max 3 tips, each under 12 words"
   ]
 }
 
-Keep the summary concise, actionable, and directly based on the provided review data. Prioritize the most impactful information for future candidates.`;
+Keep everything EXTREMELY concise. No explanations, just key points.`;
   }
 
   /**
@@ -290,7 +279,6 @@ Keep the summary concise, actionable, and directly based on the provided review 
   buildPreparationPrompt(reviews, jobRole, companyName) {
     const questionsAsked = [];
     const preparationTips = [];
-    const processStages = [];
 
     reviews.forEach(review => {
       if (review.questionsAsked) {
@@ -299,36 +287,33 @@ Keep the summary concise, actionable, and directly based on the provided review 
       if (review.preparationTips) {
         preparationTips.push(review.preparationTips);
       }
-      if (review.processStages) {
-        processStages.push(...review.processStages);
-      }
     });
 
-    return `Generate personalized preparation tips for the ${jobRole} role at ${companyName} based on the following review data:
+    const uniqueQuestions = [...new Set(questionsAsked)].slice(0, 8);
+    const uniqueTips = [...new Set(preparationTips)].slice(0, 5);
 
-Reviews: ${JSON.stringify(reviews, null, 2)}
+    return `Generate SHORT preparation tips for ${jobRole} at ${companyName}.
 
-Common Questions Asked: ${JSON.stringify(questionsAsked, null, 2)}
-Preparation Tips from Reviews: ${JSON.stringify(preparationTips, null, 2)}
-Process Stages: ${JSON.stringify(processStages, null, 2)}
+Common questions: ${uniqueQuestions.join(', ')}
+Tips from reviews: ${uniqueTips.join('. ')}
 
-Please provide a structured response in JSON format:
+Respond in this EXACT JSON format:
 {
   "tips": [
-    "5-7 specific preparation tips based on the review data"
+    "Max 4 tips, each under 15 words"
   ],
   "commonQuestions": [
-    "List of frequently asked questions from reviews"
+    "Max 5 most frequent questions"
   ],
   "skillsToFocus": [
-    "Key skills and topics to focus on"
+    "Max 4 skills, each under 8 words"
   ],
   "processInsights": [
-    "Insights about the interview process and stages"
+    "Max 3 insights, each under 12 words"
   ]
 }
 
-Make the tips specific, actionable, and directly based on the review experiences provided.`;
+Keep everything VERY concise and actionable.`;
   }
 
   /**
