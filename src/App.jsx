@@ -7,6 +7,7 @@ import { NetflixSplash } from './components/NetflixSplash.jsx';
 import { Login } from './components/Login.jsx';
 import { Signup } from './components/Signup.jsx';
 import { ProtectedRoute } from './components/ProtectedRoute.jsx';
+import { AdminDashboard } from './components/AdminDashboard.jsx';
 import authService from './services/authService.js';
 import apiService from './services/apiService.js';
 
@@ -106,6 +107,14 @@ function App() {
                         <div className="px-4 py-2 text-xs text-gray-400">
                           Role: <span className="text-red-500">{user.role}</span>
                         </div>
+                        {user.role === 'admin' && (
+                          <Link
+                            to="/admin"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                          >
+                            ⚙️ Admin Dashboard
+                          </Link>
+                        )}
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
@@ -152,6 +161,14 @@ function App() {
             } 
           />
           <Route path="/review/:id" element={<ReviewDetails />} />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </main>
 

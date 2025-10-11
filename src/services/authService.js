@@ -30,6 +30,12 @@ class AuthService {
     return !!this.getToken();
   }
 
+  // Check if user is admin
+  isAdmin() {
+    const user = this.getUser();
+    return user && user.role === 'admin';
+  }
+
   // Clear auth data (logout)
   clearAuthData() {
     localStorage.removeItem(this.TOKEN_KEY);

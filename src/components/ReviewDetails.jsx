@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../services/apiService.js';
+import authService from '../services/authService.js';
 
 export function ReviewDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const isAdmin = authService.isAdmin();
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -24,6 +28,22 @@ export function ReviewDetails() {
 
     fetchReview();
   }, [id]);
+
+  const handleDeleteReview = async () => {
+    if (!isAdmin || !review) return;
+    
+    setIsDeleting(true);
+    try {
+      await apiService.deleteReview(review.id);
+      setShowDeleteConfirm(false);
+      alert('Review deleted successfully');
+      navigate('/'); // Redirect to home page after deletion
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Failed to delete review: ' + error.message);
+      setIsDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -114,9 +134,20 @@ export function ReviewDetails() {
       <div className="relative bg-gradient-to-r from-black via-gray-900 to-red-900 text-white rounded-lg overflow-hidden mb-8">
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="relative p-8 md:p-12">
-          <div className="flex items-center gap-4 mb-6">
-            <span className="bg-red-600 text-white px-4 py-2 rounded font-bold text-lg">EPISODE</span>
-            <span className="text-red-400 font-semibold">#{review.id}</span>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <span className="bg-red-600 text-white px-4 py-2 rounded font-bold text-lg">EPISODE</span>
+              <span className="text-red-400 font-semibold">#{review.id}</span>
+            </div>
+            {isAdmin && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded font-bold transition-colors flex items-center gap-2"
+                title="Delete Review (Admin Only)"
+              >
+                🗑️ Delete Review
+              </button>
+            )}
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -309,6 +340,44 @@ export function ReviewDetails() {
           🎬 Share Your Story
         </button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-white mb-4">🗑️ Delete Review</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete this review for <span className="font-semibold text-red-400">{review.companyName}</span>? 
+              This action cannot be undone and will permanently remove this episode.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteReview}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    🗑️ Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
