@@ -1,6 +1,36 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import authService from '../services/authService.js';
+import apiService from '../services/apiService.js';
 
-export function ReviewCard({ review }) {
+export function ReviewCard({ review, onReviewDeleted }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const isAdmin = authService.isAdmin();
+
+  const handleDeleteReview = async () => {
+    if (!isAdmin) return;
+    
+    setIsDeleting(true);
+    try {
+      await apiService.deleteReview(review.id);
+      setShowDeleteConfirm(false);
+      
+      // Call parent callback to remove review from list
+      if (onReviewDeleted) {
+        onReviewDeleted(review.id);
+      }
+      
+      // Show success message
+      alert('Review deleted successfully');
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Failed to delete review: ' + error.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatSalary = (salary) => {
     if (!salary) return 'Not disclosed';
     const amount = salary.amount.toLocaleString();
@@ -60,7 +90,16 @@ export function ReviewCard({ review }) {
           <p className="text-sm text-gray-400">{review.location} • {review.jobType}</p>
         </div>
         <div className="text-right">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            {isAdmin && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="bg-red-700 hover:bg-red-800 text-white p-1.5 rounded text-xs transition-colors"
+                title="Delete Review (Admin Only)"
+              >
+                🗑️
+              </button>
+            )}
             <StarRating rating={review.rating.overall} />
             <span className="text-lg font-bold text-white">{review.rating.overall}</span>
           </div>
@@ -182,6 +221,44 @@ export function ReviewCard({ review }) {
           ▶ Watch Full Story
         </Link>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-white mb-4">🗑️ Delete Review</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete this review for <span className="font-semibold text-red-400">{review.companyName}</span>? 
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteReview}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    🗑️ Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

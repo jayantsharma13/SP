@@ -10,6 +10,7 @@
     "dev": "node --watch server.js",
     "seed": "node seedDatabase.js",
     "seed-nith": "node seedNITHamirpur.js seed",
+    "promote-admin": "node promoteToAdmin.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

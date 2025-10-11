@@ -10,7 +10,7 @@ import {
   getUserReviews,
 } from "../controllers/reviewController/index.js";
 import authentication from "../middleware/authentication.js";
-// import authorization from '../middleware/Authorization.js';
+import authorization from '../middleware/Authorization.js';
 
 const reviewRouter = Router();
 
@@ -23,7 +23,7 @@ reviewRouter.get("/user/:userId", getUserReviews); // Get reviews by specific us
 reviewRouter.get("/me", authentication, getMyReviews); // Get logged-in user's reviews
 reviewRouter.post("/", authentication, createReview);
 reviewRouter.put("/:id", authentication, updateReview);
-reviewRouter.delete("/:id", authentication, deleteReview);
+reviewRouter.delete("/:id", authentication, authorization('admin'), deleteReview);
 
 // Public route - must come after other specific routes to avoid conflicts
 reviewRouter.get("/:id", getReviewById);

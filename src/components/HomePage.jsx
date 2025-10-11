@@ -34,6 +34,11 @@ export function HomePage() {
     fetchReviews();
   }, []);
 
+  // Handle review deletion
+  const handleReviewDeleted = (deletedReviewId) => {
+    setReviews(prevReviews => prevReviews.filter(review => review.id !== deletedReviewId));
+  };
+
   // Filter and sort reviews
   const filteredAndSortedReviews = reviews
     .filter((review) => {
@@ -361,7 +366,7 @@ export function HomePage() {
                     {/* Reviews Grid for this company */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {groupedReviews[company].map((review) => (
-                        <ReviewCard key={review.id} review={review} />
+                        <ReviewCard key={review.id} review={review} onReviewDeleted={handleReviewDeleted} />
                       ))}
                     </div>
                   </div>
@@ -371,7 +376,7 @@ export function HomePage() {
               /* Individual reviews in grid format */
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredAndSortedReviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
+                  <ReviewCard key={review.id} review={review} onReviewDeleted={handleReviewDeleted} />
                 ))}
               </div>
             )}
